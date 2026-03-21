@@ -1,0 +1,10 @@
+model:
+  test_size: 0.2
+  random_state: 42
+
+training:
+  models:
+    - logistic_regression
+    - decision_tree
+    - random_forest
+    - xgboost
