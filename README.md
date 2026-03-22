@@ -4,7 +4,7 @@
 
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
-│                        LOAN APPROVAL SYSTEM                        │
+│                        LOAN APPROVAL SYSTEM                         │
 ├─────────────────┬───────────────────────┬───────────────────────────┤
 │   Frontend      │     Backend API       │     ML Pipeline           │
 │   (React/Vite)  │     (FastAPI)         │     (scikit-learn/XGB)    │
@@ -13,7 +13,7 @@
 │  ├─ App.jsx     │  ├─ main.py           │  ├─ data/                 │
 │  ├─ Predict.jsx │  ├─ routes.py         │  ├─ features/             │
 │  └─ predict.js  │  └─ schema.py         │  ├─ models/               │
-│                 │                       │  ├─ pipelines/             │
+│                 │                       │  ├─ pipelines/            │
 │  Port: 5173     │  Port: 8000           │  └─ utils/                │
 └─────────────────┴───────────────────────┴───────────────────────────┘
 ```
@@ -24,10 +24,10 @@
 
 ```
 ┌──────────────┐       HTTP POST /predict       ┌──────────────────┐
-│              │  ──────────────────────────►    │                  │
+│              │  ──────────────────────────►   │                  │
 │   React UI   │       JSON Request             │   FastAPI Server │
 │  (Vite Dev)  │                                │   (Uvicorn)      │
-│              │  ◄──────────────────────────    │                  │
+│              │  ◄──────────────────────────   │                  │
 └──────────────┘       JSON Response            └────────┬─────────┘
                        {approval, probability,           │
                         risk_level, explanations,        │
@@ -39,12 +39,12 @@
                                                 │  Engine          │
                                                 │                  │
                                                 │  ┌────────────┐  │
-                                                │  │ best_model  │  │
-                                                │  │   .pkl      │  │
+                                                │  │ best_model │  │
+                                                │  │   .pkl     │  │
                                                 │  └────────────┘  │
                                                 │  ┌────────────┐  │
-                                                │  │   SHAP      │  │
-                                                │  │ Explainer   │  │
+                                                │  │   SHAP     │  │
+                                                │  │ Explainer  │  │
                                                 │  └────────────┘  │
                                                 └──────────────────┘
 ```
