@@ -3,18 +3,25 @@ import { predictLoan } from "../api/predict";
 import { Button, CircularProgress } from "@mui/material";
 import RocketLaunchIcon from '@mui/icons-material/RocketLaunch';
 
-export default function Predict({ formData, setResult }) {
+const MINIMUM_DELAY_MS = 3000;
+
+export default function Predict({ formData, setResult, onLoadingChange }) {
   const [loading, setLoading] = useState(false);
 
   const handlePredict = async () => {
     setLoading(true);
+    onLoadingChange?.(true);
     try {
-      const result = await predictLoan(formData);
+      const [result] = await Promise.all([
+        predictLoan(formData),
+        new Promise((resolve) => setTimeout(resolve, MINIMUM_DELAY_MS)),
+      ]);
       setResult(result);
     } catch (err) {
       console.error("Analysis failed", err);
     } finally {
       setLoading(false);
+      onLoadingChange?.(false);
     }
   };
 

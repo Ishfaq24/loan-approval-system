@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Container, Grid, TextField, Card, Typography, MenuItem, Box,
   LinearProgress, ThemeProvider, createTheme, CssBaseline, Chip, Avatar,
@@ -12,6 +12,11 @@ import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import InsightsIcon from '@mui/icons-material/Insights';
 import AutoGraphIcon from '@mui/icons-material/AutoGraph';
 import QueryStatsIcon from '@mui/icons-material/QueryStats';
+import DatasetIcon from '@mui/icons-material/Dataset';
+import PsychologyIcon from '@mui/icons-material/Psychology';
+import BubbleChartIcon from '@mui/icons-material/BubbleChart';
+import TaskAltIcon from '@mui/icons-material/TaskAlt';
+import CircularProgress from '@mui/material/CircularProgress';
 import { motion, AnimatePresence } from "framer-motion";
 import Predict from "./components/Predict";
 
@@ -45,6 +50,55 @@ const inputStyle = {
 const MotionBox = motion.create(Box);
 const MotionCard = motion.create(Card);
 
+function AnalysisStep({ step }) {
+  const [active, setActive] = useState(false);
+  const [done, setDone] = useState(false);
+
+  useEffect(() => {
+    const activateTimer = setTimeout(() => setActive(true), step.delay * 1000);
+    const doneTimer = setTimeout(() => setDone(true), (step.delay + 0.6) * 1000);
+    return () => { clearTimeout(activateTimer); clearTimeout(doneTimer); };
+  }, [step.delay]);
+
+  return (
+    <MotionBox
+      initial={{ opacity: 0.35 }}
+      animate={{ opacity: active ? 1 : 0.35 }}
+      transition={{ duration: 0.4 }}
+      sx={{
+        display: 'flex', alignItems: 'center', gap: 1.5,
+        p: 1.5, borderRadius: 2.5,
+        bgcolor: done ? 'rgba(22,163,74,0.06)' : active ? 'rgba(194,142,46,0.06)' : '#fafaf8',
+        border: `1px solid ${done ? 'rgba(22,163,74,0.15)' : active ? 'rgba(194,142,46,0.15)' : '#f0ede6'}`,
+        transition: 'all 0.4s ease'
+      }}
+    >
+      <Box sx={{
+        width: 32, height: 32, borderRadius: '50%',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        bgcolor: done ? 'rgba(22,163,74,0.1)' : active ? 'rgba(194,142,46,0.12)' : '#f5f4f0',
+        color: done ? '#16a34a' : active ? '#c28e2e' : '#ccc',
+        transition: 'all 0.4s ease'
+      }}>
+        {active && !done ? (
+          <CircularProgress size={16} sx={{ color: '#c28e2e' }} />
+        ) : done ? (
+          <TaskAltIcon sx={{ fontSize: 18 }} />
+        ) : (
+          step.icon
+        )}
+      </Box>
+      <Typography sx={{
+        fontSize: '0.82rem', fontWeight: active ? 600 : 500,
+        color: done ? '#16a34a' : active ? '#1a1a1a' : '#bbb',
+        transition: 'all 0.4s ease'
+      }}>
+        {step.label}{active && !done ? '…' : done ? ' ✓' : ''}
+      </Typography>
+    </MotionBox>
+  );
+}
+
 export default function App() {
   const [form, setForm] = useState({
     no_of_dependents: 1, education: "Graduate", self_employed: "No",
@@ -54,6 +108,7 @@ export default function App() {
   });
 
   const [result, setResult] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
 
@@ -195,7 +250,7 @@ export default function App() {
                   </Grid>
                 </Grid>
 
-                <Predict formData={form} setResult={setResult} />
+                <Predict formData={form} setResult={setResult} onLoadingChange={setLoading} />
 
                 <Box sx={{ mt: 2, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 0.5 }}>
                   <SecurityIcon sx={{ fontSize: 13, color: '#ccc' }} />
@@ -210,7 +265,57 @@ export default function App() {
             <Grid size={{ xs: 12, md: 6, lg: 7 }}>
               <Box sx={{ position: 'sticky', top: 24 }}>
                 <AnimatePresence mode="wait">
-                  {!result ? (
+                  {loading ? (
+                    /* LOADING / ANALYZING STATE */
+                    <MotionCard
+                      key="loading"
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -10 }}
+                      transition={{ duration: 0.4 }}
+                      sx={{
+                        p: { xs: 4, sm: 6 }, borderRadius: 4,
+                        boxShadow: "0 8px 40px rgba(0,0,0,0.06)",
+                        border: '1px solid rgba(0,0,0,0.04)',
+                        background: '#fff',
+                        minHeight: 520,
+                        display: 'flex', flexDirection: 'column',
+                        alignItems: 'center', justifyContent: 'center',
+                        textAlign: 'center'
+                      }}
+                    >
+                      <MotionBox
+                        animate={{ rotate: 360 }}
+                        transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}
+                        sx={{
+                          width: 80, height: 80, borderRadius: '50%',
+                          background: 'linear-gradient(135deg, rgba(194,142,46,0.1), rgba(194,142,46,0.25))',
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          mb: 3
+                        }}
+                      >
+                        <PsychologyIcon sx={{ fontSize: 36, color: '#c28e2e' }} />
+                      </MotionBox>
+
+                      <Typography variant="h5" sx={{ color: '#1a1a1a', mb: 0.5 }}>
+                        Analyzing Application
+                      </Typography>
+                      <Typography sx={{ color: '#aaa', fontSize: '0.85rem', mb: 4 }}>
+                        Please wait while our AI processes the data…
+                      </Typography>
+
+                      <Box sx={{ width: '100%', maxWidth: 340, display: 'flex', flexDirection: 'column', gap: 2 }}>
+                        {[
+                          { icon: <DatasetIcon sx={{ fontSize: 18 }} />, label: 'Validating input data', delay: 0 },
+                          { icon: <AutoGraphIcon sx={{ fontSize: 18 }} />, label: 'Running ML model', delay: 0.8 },
+                          { icon: <BubbleChartIcon sx={{ fontSize: 18 }} />, label: 'Computing SHAP values', delay: 1.6 },
+                          { icon: <TaskAltIcon sx={{ fontSize: 18 }} />, label: 'Generating insights', delay: 2.4 },
+                        ].map((step) => (
+                          <AnalysisStep key={step.label} step={step} />
+                        ))}
+                      </Box>
+                    </MotionCard>
+                  ) : !result ? (
                     /* PLACEHOLDER STATE */
                     <MotionCard
                       key="placeholder"
